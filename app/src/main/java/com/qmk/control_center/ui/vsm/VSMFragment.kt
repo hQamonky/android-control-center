@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import com.android.volley.Response
 import com.qmk.control_center.R
 import com.qmk.control_center.vsm.VirtualSoundMixer
 
@@ -30,8 +31,15 @@ class VSMFragment : Fragment() {
             textView.text = it
         })
         vsm = context?.let { VirtualSoundMixer(it) }!!
-        val json = vsm.getCards()
-        textView.text = json.toString()
+        vsm.updateCards(
+            Response.Listener { response ->
+                println(response.toString())
+                textView.text = response.toString()
+            },
+            Response.ErrorListener { error ->
+                // TODO: Handle error
+                println(error.toString())
+            })
         return root
     }
 }
