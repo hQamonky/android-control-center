@@ -34,6 +34,10 @@ class VSMAPI(context: Context, baseURL: String) : HttpClient(context, baseURL) {
     }
 
     // Sinks
+    fun getSinks(responseListener: Response.Listener<JSONObject>, responseErrorListener: Response.ErrorListener) {
+        jsonGetRequest("/sinks", responseListener, responseErrorListener)
+    }
+
     fun setDefaultSink(sinkId: Int, responseListener: Response.Listener<JSONObject>, responseErrorListener: Response.ErrorListener) {
         jsonGetRequest("/sink/$sinkId/set-default", responseListener, responseErrorListener)
     }
@@ -51,6 +55,10 @@ class VSMAPI(context: Context, baseURL: String) : HttpClient(context, baseURL) {
     }
 
     // Sink inputs
+    fun getSinkInputs(responseListener: Response.Listener<JSONObject>, responseErrorListener: Response.ErrorListener) {
+        jsonGetRequest("/sink-inputs", responseListener, responseErrorListener)
+    }
+
     fun setSinkInputVolume(sinkInputId: Int, volume: String, responseListener: Response.Listener<JSONObject>, responseErrorListener: Response.ErrorListener) {
         jsonGetRequest("/sink-input/$sinkInputId/set-volume-percentage/$volume", responseListener, responseErrorListener)
     }
@@ -60,6 +68,10 @@ class VSMAPI(context: Context, baseURL: String) : HttpClient(context, baseURL) {
     }
 
     // Sources
+    fun getSources(responseListener: Response.Listener<JSONObject>, responseErrorListener: Response.ErrorListener) {
+        jsonGetRequest("/sources", responseListener, responseErrorListener)
+    }
+
     fun setDefaultSource(sourceId: Int, responseListener: Response.Listener<JSONObject>, responseErrorListener: Response.ErrorListener) {
         jsonGetRequest("/source/$sourceId/set-default", responseListener, responseErrorListener)
     }
@@ -77,11 +89,20 @@ class VSMAPI(context: Context, baseURL: String) : HttpClient(context, baseURL) {
     }
 
     // Source outputs
+    fun getSourceOutputs(responseListener: Response.Listener<JSONObject>, responseErrorListener: Response.ErrorListener) {
+        jsonGetRequest("/source-outputs", responseListener, responseErrorListener)
+    }
+
     fun setSourceOutputVolume(sourceOutputId: Int, volume: String, responseListener: Response.Listener<JSONObject>, responseErrorListener: Response.ErrorListener) {
         jsonGetRequest("/source-output/$sourceOutputId/set-volume-percentage/$volume", responseListener, responseErrorListener)
     }
 
     fun setSourceOutputMute(sourceOutputId: Int, mute: String, responseListener: Response.Listener<JSONObject>, responseErrorListener: Response.ErrorListener) {
         jsonGetRequest("/source-output/$sourceOutputId/set-mute/$mute", responseListener, responseErrorListener)
+    }
+
+    // Clients
+    fun getClients(responseListener: Response.Listener<JSONObject>, responseErrorListener: Response.ErrorListener) {
+        jsonGetRequest("/clients", responseListener, responseErrorListener)
     }
 }

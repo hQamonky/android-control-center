@@ -1,9 +1,11 @@
 package com.qmk.control_center.ui.settings
 
 import android.os.Bundle
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceFragmentCompat
 import com.qmk.control_center.R
+
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -17,6 +19,16 @@ class SettingsActivity : AppCompatActivity() {
             )
             .commit()
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     class SettingsFragment : PreferenceFragmentCompat() {

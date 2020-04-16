@@ -13,8 +13,13 @@
     <string name="title_activity_settings">Settings</string>
 
     <!-- Preference Titles -->
+    <string name="vsm_header">QMK Virtual Sound Mixer</string>
     <string name="messages_header">Messages</string>
     <string name="sync_header">Sync</string>
+
+    <!-- QMK Virtual Sound Mixer Preferences -->
+    <string name="vsm_host_title">Server IP address</string>
+    <string name="vsm_port_title">Port</string>
 
     <!-- Messages Preferences -->
     <string name="signature_title">Your signature</string>
