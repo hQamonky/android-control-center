@@ -1,6 +1,8 @@
 package com.qmk.control_center.vsm
 
 import android.content.Context
+import android.content.SharedPreferences
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.util.Log
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.android.volley.Response
@@ -11,12 +13,26 @@ class VirtualSoundMixer(private val context: Context) {
     private var api: VSMAPI = VSMAPI(context, buildUrlFromSettings())
     private lateinit var cards: JSONObject
 
+    init {
+        val sharedPref = getDefaultSharedPreferences(context)
+        sharedPref.registerOnSharedPreferenceChangeListener {
+                _, key ->
+            println(key)
+            if (key == "vsm_host_ip" || key == "vsm_port")
+                refreshUrl()
+        }
+    }
+
     fun updateCards(responseListener: Response.Listener<JSONObject>, responseErrorListener: Response.ErrorListener) {
         api.getCards(responseListener, responseErrorListener)
     }
 
     fun getCards() : JSONObject {
         return cards
+    }
+
+    private fun refreshUrl() {
+        api.setBaseUrl(buildUrlFromSettings())
     }
 
     private fun buildUrlFromSettings() : String {

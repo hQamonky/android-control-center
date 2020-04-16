@@ -7,7 +7,11 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import org.json.JSONObject
 
-abstract class HttpClient(private val context: Context, private val baseURL: String) {
+abstract class HttpClient(private val context: Context, private var baseURL: String) {
+
+    fun setBaseUrl(url: String) {
+        baseURL = url
+    }
 
     fun jsonGetRequest(endpoint: String, responseListener: Response.Listener<JSONObject>, responseErrorListener: Response.ErrorListener) {
         // Instantiate the RequestQueue.
