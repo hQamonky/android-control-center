@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/settings_header">
+
+        <EditTextPreference
+            app:key="host_ip"
+            app:title="@string/settings_host_title"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="port"
+            app:title="@string/settings_port_title"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

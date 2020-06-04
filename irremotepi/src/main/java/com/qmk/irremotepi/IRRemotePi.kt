@@ -1,8 +1,9 @@
 package com.qmk.irremotepi
 
 import android.content.Context
-import android.preference.PreferenceManager.getDefaultSharedPreferences
+import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import android.util.Log
+import androidx.appcompat.app.AlertDialog
 import com.android.volley.Response
 import org.json.JSONArray
 import org.json.JSONObject
@@ -14,10 +15,20 @@ class IRRemotePi(private val context: Context) {
     private var listener: Listener? = null
 
     init {
+        // Initiate members
         refresh()
+        // Set settings listener
+        val sharedPref = getDefaultSharedPreferences(context)
+        sharedPref.registerOnSharedPreferenceChangeListener {
+                _, key ->
+            println(key)
+            if (key == "host_ip" || key == "port")
+                refreshUrl()
+        }
     }
 
     fun refresh() {
+        // Update members from API
         api.getDevices(
             Response.Listener { response ->
             println(response.toString())
@@ -33,6 +44,36 @@ class IRRemotePi(private val context: Context) {
             println(error.toString())
             listener?.onRefreshFail()
         })
+    }
+
+    fun factoryReset() {
+        val alertDialog: AlertDialog? = context.let {
+            val builder = AlertDialog.Builder(it)
+            builder.apply {
+                setTitle(R.string.factory_reset_dialog_title)
+                setMessage(R.string.factory_reset_dialog_message)
+                setPositiveButton(R.string.ok) { _, _ ->
+                    // User clicked OK button
+                    api.clearDatabase(
+                        Response.Listener { response ->
+                            println(response.toString())
+                            devices.clear()
+                            listener?.onFactoryResetSuccess()
+                        }, Response.ErrorListener { error ->
+                            // Handle error
+                            println(error.toString())
+                            listener?.onFactoryResetFail()
+                        })
+                }
+                setNegativeButton(R.string.cancel) { dialog, _ ->
+                    // User cancelled the dialog
+                    dialog.dismiss()
+                }
+            }
+            // Create the AlertDialog
+            builder.create()
+        }
+        alertDialog!!.show()
     }
 
     fun addDevice(name: String, gpio: Int) {
@@ -68,17 +109,20 @@ class IRRemotePi(private val context: Context) {
     private fun buildUrlFromSettings() : String {
         val sharedPref = getDefaultSharedPreferences(context)
 
-        val ip = sharedPref.getString("irpi_host_ip", "0.0.0.0")
-        val port = sharedPref.getString("irpi_port", "8094")
+        val ip = sharedPref.getString("host_ip", "0.0.0.0")
+        val port = sharedPref.getString("port", "8094")
 
         val url = if (port.equals(""))
             "http://$ip"
         else
             "http://$ip:$port"
-        Log.d("" +
-                "IRRemotePi", "Built url : $url.")
+        Log.d("IRRemotePi", "Built url : $url.")
 
         return url
+    }
+
+    private fun refreshUrl() {
+        api.setBaseUrl(buildUrlFromSettings())
     }
 
     fun setListener(listener: Listener) {
@@ -88,6 +132,8 @@ class IRRemotePi(private val context: Context) {
     interface Listener {
         fun onRefreshSuccess()
         fun onRefreshFail()
+        fun onFactoryResetSuccess()
+        fun onFactoryResetFail()
         fun onAddDeviceSuccess()
         fun onAddDeviceFail()
         fun onDeleteDeviceSuccess()

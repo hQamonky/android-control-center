@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Standard strings -->
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Factory reset dialog -->
+    <string name="factory_reset_dialog_title">Factory Reset</string>
+    <string name="factory_reset_dialog_message">Restore the database? This will erase all your registered devices and commands!</string>
+
+    <!-- Settings -->
+    <string name="settings_header">QMK IR Remote Pi</string>
+    <string name="settings_host_title">Server IP address</string>
+    <string name="settings_port_title">Port</string>
+</resources>

@@ -1,3 +1,3 @@
 # TODO
-- Create and manage preference class
 - Implement listeners correctly
+- Handle errors using an ErrorManager

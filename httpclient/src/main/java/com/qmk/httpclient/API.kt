@@ -15,6 +15,11 @@ fun getDataArray(response: String): JSONArray {
     return json.getJSONArray("data")
 }
 
+fun getResponseMessage(response: String): String {
+    val json = JSONObject(response)
+    return json.getString("message")
+}
+
 abstract class API(context: Context, baseURL: String) : Client(context, baseURL)  {
     fun getUserGuide(responseListener: Response.Listener<JSONObject>, responseErrorListener: Response.ErrorListener) {
         jsonGetRequest("/", responseListener, responseErrorListener)
