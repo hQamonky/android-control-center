@@ -10,14 +10,14 @@ import org.json.JSONObject
 
 class IRRemotePi(private val context: Context) {
     private var api = API(context, buildUrlFromSettings())
-    var devices: MutableSet<Device> = mutableSetOf()
+    var devices: MutableList<Device> = mutableListOf()
     private lateinit var json: JSONArray
     private var listener: Listener? = null
 
     init {
         // Initiate members
         refresh()
-        // Set settings listener
+        // Set settings change listener
         val sharedPref = getDefaultSharedPreferences(context)
         sharedPref.registerOnSharedPreferenceChangeListener {
                 _, key ->
@@ -35,7 +35,7 @@ class IRRemotePi(private val context: Context) {
             json = com.qmk.httpclient.getDataArray(response.toString())
             for (i in 0 until json.length()) {
                 val device = json.getJSONObject(i)
-                devices = mutableSetOf()
+                devices = mutableListOf()
                 devices.add(Device(device.getInt("id"), api))
             }
             listener?.onRefreshSuccess()
@@ -92,18 +92,9 @@ class IRRemotePi(private val context: Context) {
     }
 
     fun deleteDevice(id: Int) {
-        findDevice(id)?.delete()
+        devices[id].delete()
         // TODO: Remove device form devices in success callback
-        devices.remove(findDevice(id))
-    }
-
-    private fun findDevice(id: Int): Device? {
-        for (device in devices) {
-            if (device.id == id) {
-                return device
-            }
-        }
-        return  null
+        devices.removeAt(id)
     }
 
     private fun buildUrlFromSettings() : String {
@@ -126,6 +117,7 @@ class IRRemotePi(private val context: Context) {
     }
 
     fun setListener(listener: Listener) {
+        // Advanced article on listeners: https://antonioleiva.com/listeners-several-functions-kotlin/
         this.listener = listener
     }
 

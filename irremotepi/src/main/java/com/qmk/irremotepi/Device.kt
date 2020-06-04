@@ -8,7 +8,7 @@ class Device(val id: Int, private val api: API) {
 //        get() = this.name
     private var gpio: Int? = null
 //        get() = this.gpio
-    var commands: MutableSet<Command> = mutableSetOf()
+    var commands: MutableList<Command> = mutableListOf()
     private lateinit var json: JSONObject
     private var listener: Listener? = null
 
@@ -26,7 +26,7 @@ class Device(val id: Int, private val api: API) {
                 gpio = json.getInt("gpio")
                 for (i in 0 until json.getJSONArray("commands").length()) {
                     val command = json.getJSONArray("commands").getJSONObject(i)
-                    commands = mutableSetOf()
+                    commands = mutableListOf()
                     commands.add(Command(id, command.getInt("id"), command.getString("name"), api))
                 }
                 listener?.onRefreshSuccess()
@@ -52,6 +52,12 @@ class Device(val id: Int, private val api: API) {
                 println(error.toString())
                 listener?.onRecordFail()
             })
+    }
+
+    fun deleteCommand(id: Int) {
+        commands[id].delete()
+        // TODO: Remove command form commands in success callback
+        commands.removeAt(id)
     }
 
     fun delete() {
@@ -106,6 +112,8 @@ class Device(val id: Int, private val api: API) {
         fun onRefreshFail()
         fun onRecordSuccess()
         fun onRecordFail()
+        fun onDeleteCommandSuccess()
+        fun onDeleteCommandFail()
         fun onSetNameSuccess()
         fun onSetNameFail()
         fun onSetGpioSuccess()
