@@ -1,11 +1,11 @@
 package com.qmk.irremotepiapp
 
 import android.content.DialogInterface
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.ListAdapter
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -14,6 +14,7 @@ import androidx.viewpager.widget.ViewPager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import com.qmk.irremotepiapp.ui.main.SectionsPagerAdapter
+import com.qmk.irremotepiapp.ui.main.SettingsActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -54,8 +55,8 @@ class MainActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.action_settings -> {
                 Log.d("MainMenu", "Selected Settings, start activity.")
-//                val intent = Intent(this@MainActivity, SettingsActivity::class.java)
-//                startActivity(intent)
+                val intent = Intent(this@MainActivity, SettingsActivity::class.java)
+                startActivity(intent)
                 true
             }
             R.id.action_delete_device -> {
