@@ -1,17 +1,18 @@
 package com.qmk.irremotepiapp
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.util.Log
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.tabs.TabLayout
-import androidx.viewpager.widget.ViewPager
-import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
+import android.widget.ListAdapter
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.viewpager.widget.ViewPager
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.tabs.TabLayout
 import com.qmk.irremotepiapp.ui.main.SectionsPagerAdapter
 
 class MainActivity : AppCompatActivity() {
@@ -22,11 +23,12 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-//        val sectionsPagerAdapter = SectionsPagerAdapter(this, supportFragmentManager)
+        val toolbar: Toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
+
         sectionsPagerAdapter = SectionsPagerAdapter(this, supportFragmentManager)
         val viewPager: ViewPager = findViewById(R.id.view_pager)
         viewPager.adapter = sectionsPagerAdapter
-//        val tabs: TabLayout = findViewById(R.id.tabs)
         tabs = findViewById(R.id.tabs)
         tabs.setupWithViewPager(viewPager)
         val fab: FloatingActionButton = findViewById(R.id.fab)
@@ -39,6 +41,30 @@ class MainActivity : AppCompatActivity() {
 //            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
 //                .setAction("Action", null).show()
 //        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle item selection
+        return when (item.itemId) {
+            R.id.action_settings -> {
+                Log.d("MainMenu", "Selected Settings, start activity.")
+//                val intent = Intent(this@MainActivity, SettingsActivity::class.java)
+//                startActivity(intent)
+                true
+            }
+            R.id.action_delete_device -> {
+                Log.d("MainMenu", "Selected Delete Device, show dialog.")
+                deleteDeviceDialog()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     private fun addDeviceDialog() {
@@ -73,7 +99,39 @@ class MainActivity : AppCompatActivity() {
         sectionsPagerAdapter.addTab(name)
     }
 
-    private fun deleteDevice(id: Int) {
+    private fun deleteDeviceDialog() {
+        val array = sectionsPagerAdapter.tabTitles.toTypedArray()
+        if (array.isNotEmpty()) {
+            val alertDialog: AlertDialog? = this.let {
+                val builder = AlertDialog.Builder(it)
+                // Get the layout
+                var selectedItem = 0
+                builder.apply {
+                    setTitle(R.string.new_device_dialog_title)
+                    setSingleChoiceItems(array, selectedItem) { _: DialogInterface, i: Int ->
+                        selectedItem = i
+                    }
+                    setPositiveButton(R.string.delete) { _, _ ->
+                        // User clicked Delete button
+                        deleteDevice(selectedItem)
+                    }
+                    setNegativeButton(R.string.cancel) { dialog, _ ->
+                        // User cancelled the dialog
+                        dialog.dismiss()
+                    }
+                }
+                // Create the AlertDialog
+                builder.create()
+            }
+            alertDialog!!.show()
+        }
+    }
 
+    private fun deleteDevice(position: Int) {
+        Log.d("MainActivity", "Delete device: $position")
+        if (tabs.tabCount >= 1 && position < tabs.tabCount) {
+            tabs.removeTabAt(position)
+            sectionsPagerAdapter.removeTab(position)
+        }
     }
 }
