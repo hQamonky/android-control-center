@@ -46,7 +46,7 @@ class IRRemotePi(private val context: Context) {
         })
     }
 
-    fun factoryReset() {
+    fun factoryReset(context: Context) {
         val alertDialog: AlertDialog? = context.let {
             val builder = AlertDialog.Builder(it)
             builder.apply {

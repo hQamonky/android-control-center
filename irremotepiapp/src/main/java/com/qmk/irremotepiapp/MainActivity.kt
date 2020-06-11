@@ -13,6 +13,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
+import com.qmk.irremotepi.IRRemotePi
 import com.qmk.irremotepiapp.ui.main.SectionsPagerAdapter
 import com.qmk.irremotepiapp.ui.main.SettingsActivity
 
@@ -27,6 +28,8 @@ class MainActivity : AppCompatActivity() {
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
+        SingleIRRemotePi.instance = IRRemotePi(this)
+
         sectionsPagerAdapter = SectionsPagerAdapter(this, supportFragmentManager)
         val viewPager: ViewPager = findViewById(R.id.view_pager)
         viewPager.adapter = sectionsPagerAdapter
@@ -37,11 +40,6 @@ class MainActivity : AppCompatActivity() {
         fab.setOnClickListener {
             addDeviceDialog()
         }
-
-//        fab.setOnClickListener { view ->
-//            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                .setAction("Action", null).show()
-//        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -134,5 +132,13 @@ class MainActivity : AppCompatActivity() {
             tabs.removeTabAt(position)
             sectionsPagerAdapter.removeTab(position)
         }
+    }
+
+    object SingleIRRemotePi {
+
+        init {
+            println("Singleton class invoked.")
+        }
+        lateinit var instance: IRRemotePi
     }
 }

@@ -13,4 +13,5 @@
     <string name="settings_header">QMK IR Remote Pi</string>
     <string name="settings_host_title">Server IP address</string>
     <string name="settings_port_title">Port</string>
+    <string name="settings_factory_reset_summary_message">Restore the database</string>
 </resources>

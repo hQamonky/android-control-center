@@ -3,7 +3,8 @@ package com.qmk.irremotepiapp.ui.main
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.Preference
+import com.qmk.irremotepiapp.MainActivity
 import com.qmk.irremotepiapp.R
 
 class SettingsActivity : AppCompatActivity() {
@@ -11,10 +12,14 @@ class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.settings_activity)
+
+        val settingsFragment = com.qmk.irremotepi.SettingsFragment(Preference.OnPreferenceClickListener {
+            MainActivity.SingleIRRemotePi.instance.factoryReset(this)
+            true
+        })
         supportFragmentManager
             .beginTransaction()
-//            .replace(R.id.settings, SettingsFragment())
-            .replace(R.id.settings, com.qmk.irremotepi.SettingsFragment())
+            .replace(R.id.settings, settingsFragment)
             .commit()
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
@@ -26,12 +31,6 @@ class SettingsActivity : AppCompatActivity() {
                 true
             }
             else -> super.onOptionsItemSelected(item)
-        }
-    }
-
-    class SettingsFragment : PreferenceFragmentCompat() {
-        override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-            setPreferencesFromResource(R.xml.root_preferences, rootKey)
         }
     }
 }

@@ -5,7 +5,6 @@ import org.json.JSONObject
 
 class Device(val id: Int, private val api: API) {
     private var name: String? = null
-//        get() = this.name
     private var gpio: Int? = null
 //        get() = this.gpio
     var commands: MutableList<Command> = mutableListOf()
@@ -71,6 +70,10 @@ class Device(val id: Int, private val api: API) {
                 println(error.toString())
                 listener?.onDeleteFail()
             })
+    }
+
+    fun getName(): String {
+        return name.toString()
     }
 
     fun setName(name: String) {

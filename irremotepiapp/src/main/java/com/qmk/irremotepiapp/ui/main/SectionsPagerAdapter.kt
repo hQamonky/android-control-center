@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
+import com.qmk.irremotepiapp.MainActivity
 
 /**
  * A [FragmentPagerAdapter] that returns a fragment corresponding to
@@ -13,6 +14,13 @@ class SectionsPagerAdapter(private val context: Context, fm: FragmentManager) :
     FragmentPagerAdapter(fm) {
 
     var tabTitles: MutableList<String> = mutableListOf()
+    var irRemotePi = MainActivity.SingleIRRemotePi.instance
+
+    init {
+        for (device in irRemotePi.devices) {
+            tabTitles.add(device.getName())
+        }
+    }
 
     override fun getItem(position: Int): Fragment {
         // getItem is called to instantiate the fragment for the given page.
