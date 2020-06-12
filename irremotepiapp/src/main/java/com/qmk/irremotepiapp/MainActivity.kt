@@ -21,6 +21,12 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var tabs: TabLayout
     private lateinit var sectionsPagerAdapter: SectionsPagerAdapter
+    object SingleIRRemotePi {
+        init {
+            println("SingleIRRemotePi class invoked.")
+        }
+        lateinit var instance: IRRemotePi
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,8 +82,9 @@ class MainActivity : AppCompatActivity() {
                 setView(linearLayout)
                 setPositiveButton(R.string.ok) { _, _ ->
                     // User clicked OK button
-                    val textView: TextView = linearLayout.findViewById(R.id.device_name)
-                    addDevice(textView.text.toString())
+                    val nameTextView: TextView = linearLayout.findViewById(R.id.device_name)
+                    val gpioTextView: TextView = linearLayout.findViewById(R.id.device_gpio)
+                    addDevice(nameTextView.text.toString(), gpioTextView.text.toString().toInt())
                 }
                 setNegativeButton(R.string.cancel) { dialog, _ ->
                     // User cancelled the dialog
@@ -90,9 +97,10 @@ class MainActivity : AppCompatActivity() {
         alertDialog!!.show()
     }
 
-    private fun addDevice(name: String) {
+    private fun addDevice(name: String, gpio: Int) {
         Log.d("MainActivity", "New device: $name")
         // Create new device
+        SingleIRRemotePi.instance.addDevice(name, gpio)
         // Create new tab
         tabs.addTab(tabs.newTab().setText(name))
         sectionsPagerAdapter.addTab(name)
@@ -129,16 +137,9 @@ class MainActivity : AppCompatActivity() {
     private fun deleteDevice(position: Int) {
         Log.d("MainActivity", "Delete device: $position")
         if (tabs.tabCount >= 1 && position < tabs.tabCount) {
+            SingleIRRemotePi.instance.deleteDevice(position)
             tabs.removeTabAt(position)
             sectionsPagerAdapter.removeTab(position)
         }
-    }
-
-    object SingleIRRemotePi {
-
-        init {
-            println("Singleton class invoked.")
-        }
-        lateinit var instance: IRRemotePi
     }
 }

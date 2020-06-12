@@ -13,6 +13,7 @@
 
     <string name="new_device_dialog_title">New Device</string>
     <string name="device_name">Device name</string>
+    <string name="device_gpio">Device GPIO pin</string>
     <string name="title_activity_settings">SettingsActivity</string>
 
     <!-- Preference Titles -->
