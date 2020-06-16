@@ -8,11 +8,11 @@ import com.android.volley.Response
 import org.json.JSONArray
 import org.json.JSONObject
 
-class IRRemotePi(private val context: Context) {
+class IRRemotePi(private val context: Context, var listener: Listener) {
     private var api = API(context, buildUrlFromSettings())
     var devices: MutableList<Device> = mutableListOf()
     private lateinit var json: JSONArray
-    private var listener: Listener? = null
+//    private var listener: Listener? = null
 
     init {
         // Initiate members
@@ -31,19 +31,20 @@ class IRRemotePi(private val context: Context) {
         // Update members from API
         api.getDevices(
             Response.Listener { response ->
-            println(response.toString())
-            json = com.qmk.httpclient.getDataArray(response.toString())
-            for (i in 0 until json.length()) {
-                val device = json.getJSONObject(i)
+                println(response.toString())
+                json = com.qmk.httpclient.getDataArray(response.toString())
                 devices = mutableListOf()
-                devices.add(Device(device.getInt("id"), api))
+                for (i in 0 until json.length()) {
+                    val device = json.getJSONObject(i)
+                    devices.add(Device(device.getInt("id"), api))
+                }
+                listener?.onRefreshSuccess()
+            }, Response.ErrorListener { error ->
+                // Handle error
+                println(error.toString())
+                listener?.onRefreshFail()
             }
-            listener?.onRefreshSuccess()
-        }, Response.ErrorListener { error ->
-            // Handle error
-            println(error.toString())
-            listener?.onRefreshFail()
-        })
+        )
     }
 
     fun factoryReset(context: Context) {
@@ -77,7 +78,7 @@ class IRRemotePi(private val context: Context) {
     }
 
     fun addDevice(name: String, gpio: Int) {
-        val body = JSONObject("{ \"name\": $name, \"gpio\": $gpio }")
+        val body = JSONObject("{ \"name\": \"$name\", \"gpio\": $gpio }")
         api.createDevice(body,
             Response.Listener { response ->
                 println(response.toString())
@@ -116,10 +117,10 @@ class IRRemotePi(private val context: Context) {
         api.setBaseUrl(buildUrlFromSettings())
     }
 
-    fun setListener(listener: Listener) {
-        // Advanced article on listeners: https://antonioleiva.com/listeners-several-functions-kotlin/
-        this.listener = listener
-    }
+//    fun setListener(listener: Listener) {
+//        // Advanced article on listeners: https://antonioleiva.com/listeners-several-functions-kotlin/
+//        this.listener = listener
+//    }
 
     interface Listener {
         fun onRefreshSuccess()
