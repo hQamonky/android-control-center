@@ -22,6 +22,6 @@ fun getResponseMessage(response: String): String {
 
 abstract class API(context: Context, baseURL: String) : Client(context, baseURL)  {
     fun getUserGuide(responseListener: Response.Listener<JSONObject>, responseErrorListener: Response.ErrorListener) {
-        jsonGetRequest("/", responseListener, responseErrorListener)
+        syncJsonGetRequest("/", responseListener, responseErrorListener)
     }
 }

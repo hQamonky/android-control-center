@@ -1,15 +1,15 @@
 package com.qmk.irremotepi
 
+import android.util.Log
 import com.android.volley.Response
 import org.json.JSONObject
 
-class Device(val id: Int, private val api: API) {
+class Device(val id: Int, var listener: Listener) {
     private var name: String? = null
     private var gpio: Int? = null
 //        get() = this.gpio
     var commands: MutableList<Command> = mutableListOf()
     private lateinit var json: JSONObject
-    private var listener: Listener? = null
 
     init {
         // Initialize members
@@ -17,33 +17,34 @@ class Device(val id: Int, private val api: API) {
     }
 
     fun refresh() {
-        api.getDevice(id,
+        IRRemotePi.SingleApi.instance.getDevice(id,
             Response.Listener { response ->
                 println(response.toString())
                 json = JSONObject(response.toString()).getJSONObject("data")
                 name = json.getString("name")
                 gpio = json.getInt("gpio")
+                commands = mutableListOf()
                 for (i in 0 until json.getJSONArray("commands").length()) {
                     val command = json.getJSONArray("commands").getJSONObject(i)
-                    commands = mutableListOf()
-                    commands.add(Command(id, command.getInt("id"), command.getString("name"), api))
+                    Log.d("Device", "Adding Command: ${command.getString("name")}")
+                    commands.add(Command(id, command.getInt("id"), command.getString("name")))
                 }
-                listener?.onRefreshSuccess()
+                listener.onRefreshDeviceSuccess(this)
             }, Response.ErrorListener { error ->
                 // Handle error
                 println(error.toString())
-                listener?.onRefreshFail()
+                listener.onRefreshDeviceFail(this)
             })
     }
 
     fun record(commandName: String) {
         val body = JSONObject("{ \"command_name\": $commandName }")
-        api.recordCommand(id, body,
+        IRRemotePi.SingleApi.instance.recordCommand(id, body,
             Response.Listener { response ->
                 println(response.toString())
                 // Add new command to commands member
                 val command = JSONObject(response.toString())
-                commands.add(Command(id, command.getInt("id"), commandName, api))
+                commands.add(Command(id, command.getInt("id"), commandName))
                 listener?.onRecordSuccess()
             },
             Response.ErrorListener { error ->
@@ -60,7 +61,7 @@ class Device(val id: Int, private val api: API) {
     }
 
     fun delete() {
-        api.deleteDevice(id,
+        IRRemotePi.SingleApi.instance.deleteDevice(id,
             Response.Listener { response ->
                 println(response.toString())
                 listener?.onDeleteSuccess()
@@ -78,7 +79,7 @@ class Device(val id: Int, private val api: API) {
 
     fun setName(name: String) {
         val body = JSONObject("{ \"name\": $name, \"gpio\": $gpio }")
-        api.editDevice(id, body,
+        IRRemotePi.SingleApi.instance.editDevice(id, body,
             Response.Listener { response ->
                 println(response.toString())
                 this.name = name
@@ -93,7 +94,7 @@ class Device(val id: Int, private val api: API) {
 
     fun setGpio(gpio: Int) {
         val body = JSONObject("{ \"name\": $name, \"gpio\": $gpio }")
-        api.editDevice(id, body,
+        IRRemotePi.SingleApi.instance.editDevice(id, body,
             Response.Listener { response ->
                 println(response.toString())
                 this.gpio = gpio
@@ -106,22 +107,42 @@ class Device(val id: Int, private val api: API) {
             })
     }
 
-    fun setListener(listener: Listener) {
-        this.listener = listener
-    }
+    open class Listener {
+        open fun onRefreshDeviceSuccess(device: Device) {
 
-    interface Listener {
-        fun onRefreshSuccess()
-        fun onRefreshFail()
-        fun onRecordSuccess()
-        fun onRecordFail()
-        fun onDeleteCommandSuccess()
-        fun onDeleteCommandFail()
-        fun onSetNameSuccess()
-        fun onSetNameFail()
-        fun onSetGpioSuccess()
-        fun onSetGpioFail()
-        fun onDeleteSuccess()
-        fun onDeleteFail()
+        }
+        open fun onRefreshDeviceFail(device: Device) {
+
+        }
+        open fun onRecordSuccess() {
+
+        }
+        open fun onRecordFail() {
+
+        }
+        open fun onDeleteCommandSuccess() {
+
+        }
+        open fun onDeleteCommandFail() {
+
+        }
+        open fun onSetNameSuccess() {
+
+        }
+        open fun onSetNameFail() {
+
+        }
+        open fun onSetGpioSuccess() {
+
+        }
+        open fun onSetGpioFail() {
+
+        }
+        open fun onDeleteSuccess() {
+
+        }
+        open fun onDeleteFail() {
+
+        }
     }
 }

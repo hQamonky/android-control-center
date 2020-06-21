@@ -1,14 +1,11 @@
 package com.qmk.irremotepiapp
 
-import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-import android.util.AttributeSet
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -31,7 +28,12 @@ class MainActivity : AppCompatActivity() {
         }
         lateinit var instance: IRRemotePi
     }
-    private var irRemotePi = IRRemotePiListener()
+    private var irRemotePiListener = object : IRRemotePi.Listener(){
+        override fun onRefreshDeviceSuccess(device: Device) {
+            super.onRefreshDeviceSuccess(device)
+            createTab(device.getName())
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,7 +41,7 @@ class MainActivity : AppCompatActivity() {
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        SingleIRRemotePi.instance = IRRemotePi(this, listener = IRRemotePiListener())
+        SingleIRRemotePi.instance = IRRemotePi(this, irRemotePiListener)
 
         sectionsPagerAdapter = SectionsPagerAdapter(this, supportFragmentManager)
 
@@ -53,8 +55,6 @@ class MainActivity : AppCompatActivity() {
         fab.setOnClickListener {
             addDeviceDialog()
         }
-
-        initTabs()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -67,10 +67,7 @@ class MainActivity : AppCompatActivity() {
         // Handle item selection
         return when (item.itemId) {
             R.id.action_refresh -> {
-                SingleIRRemotePi.instance.refresh()
-                tabs.removeAllTabs()
-                sectionsPagerAdapter.tabTitles.clear()
-                initTabs()
+                refreshTabs()
                 true
             }
             R.id.action_settings -> {
@@ -88,15 +85,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun initTabs() {
-        // Get devices from database
-        val irRemotePi = SingleIRRemotePi.instance
-//        irRemotePi.refresh()
-        for (device in irRemotePi.devices) {
-            // Create new tab
-            tabs.addTab(tabs.newTab().setText(device.getName()))
-            sectionsPagerAdapter.addTab(device.getName())
-        }
+    private fun refreshTabs() {
+        Log.d("MainActivity", "Refreshing tabs...")
+        deleteAllTabs()
+        SingleIRRemotePi.instance.refresh()
     }
 
     private fun addDeviceDialog() {
@@ -129,6 +121,10 @@ class MainActivity : AppCompatActivity() {
         // Create new device
         SingleIRRemotePi.instance.addDevice(name, gpio)
         // Create new tab
+        createTab(name)
+    }
+
+    private fun createTab(name: String) {
         tabs.addTab(tabs.newTab().setText(name))
         sectionsPagerAdapter.addTab(name)
     }
@@ -165,43 +161,17 @@ class MainActivity : AppCompatActivity() {
         Log.d("MainActivity", "Delete device: $position")
         if (tabs.tabCount >= 1 && position < tabs.tabCount) {
             SingleIRRemotePi.instance.deleteDevice(position)
-            tabs.removeTabAt(position)
-            sectionsPagerAdapter.removeTab(position)
+            deleteTab(position)
         }
     }
 
-    class IRRemotePiListener : IRRemotePi.Listener {
-        override fun onRefreshSuccess() {
-            TODO("Not yet implemented")
-        }
+    private fun deleteTab(position: Int) {
+        tabs.removeTabAt(position)
+        sectionsPagerAdapter.removeTab(position)
+    }
 
-        override fun onRefreshFail() {
-            TODO("Not yet implemented")
-        }
-
-        override fun onFactoryResetSuccess() {
-            TODO("Not yet implemented")
-        }
-
-        override fun onFactoryResetFail() {
-            TODO("Not yet implemented")
-        }
-
-        override fun onAddDeviceSuccess() {
-            TODO("Not yet implemented")
-        }
-
-        override fun onAddDeviceFail() {
-            TODO("Not yet implemented")
-        }
-
-        override fun onDeleteDeviceSuccess() {
-            TODO("Not yet implemented")
-        }
-
-        override fun onDeleteDeviceFail() {
-            TODO("Not yet implemented")
-        }
-
+    private fun deleteAllTabs() {
+        tabs.removeAllTabs()
+        sectionsPagerAdapter.tabTitles.clear()
     }
 }

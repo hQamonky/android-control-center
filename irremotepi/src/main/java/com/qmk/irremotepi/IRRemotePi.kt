@@ -9,12 +9,18 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 class IRRemotePi(private val context: Context, var listener: Listener) {
-    private var api = API(context, buildUrlFromSettings())
+    object SingleApi {
+        init {
+            println("SingleIRRemotePi class invoked.")
+        }
+        lateinit var instance: API
+    }
     var devices: MutableList<Device> = mutableListOf()
     private lateinit var json: JSONArray
 //    private var listener: Listener? = null
 
     init {
+        SingleApi.instance = API(context, buildUrlFromSettings())
         // Initiate members
         refresh()
         // Set settings change listener
@@ -28,21 +34,22 @@ class IRRemotePi(private val context: Context, var listener: Listener) {
     }
 
     fun refresh() {
-        // Update members from API
-        api.getDevices(
+        // Update members from SingleApi.instance
+        SingleApi.instance.getDevices(
             Response.Listener { response ->
                 println(response.toString())
                 json = com.qmk.httpclient.getDataArray(response.toString())
                 devices = mutableListOf()
                 for (i in 0 until json.length()) {
                     val device = json.getJSONObject(i)
-                    devices.add(Device(device.getInt("id"), api))
+                    Log.d("IRRemotePi", "Adding Device: ${device.getString("name")}")
+                    devices.add(Device(device.getInt("id"), listener))
                 }
-                listener?.onRefreshSuccess()
+                listener.onRefreshSuccess()
             }, Response.ErrorListener { error ->
                 // Handle error
                 println(error.toString())
-                listener?.onRefreshFail()
+                listener.onRefreshFail()
             }
         )
     }
@@ -55,15 +62,15 @@ class IRRemotePi(private val context: Context, var listener: Listener) {
                 setMessage(R.string.factory_reset_dialog_message)
                 setPositiveButton(R.string.ok) { _, _ ->
                     // User clicked OK button
-                    api.clearDatabase(
+                    SingleApi.instance.clearDatabase(
                         Response.Listener { response ->
                             println(response.toString())
                             devices.clear()
-                            listener?.onFactoryResetSuccess()
+                            listener.onFactoryResetSuccess()
                         }, Response.ErrorListener { error ->
                             // Handle error
                             println(error.toString())
-                            listener?.onFactoryResetFail()
+                            listener.onFactoryResetFail()
                         })
                 }
                 setNegativeButton(R.string.cancel) { dialog, _ ->
@@ -79,16 +86,16 @@ class IRRemotePi(private val context: Context, var listener: Listener) {
 
     fun addDevice(name: String, gpio: Int) {
         val body = JSONObject("{ \"name\": \"$name\", \"gpio\": $gpio }")
-        api.createDevice(body,
+        SingleApi.instance.createDevice(body,
             Response.Listener { response ->
                 println(response.toString())
                 val json = com.qmk.httpclient.getDataObject(response.toString())
-                devices.add(Device(json.getInt("id"), api))
-                listener?.onAddDeviceSuccess()
+                devices.add(Device(json.getInt("id"), listener))
+                listener.onAddDeviceSuccess()
             }, Response.ErrorListener { error ->
                 // Handle error
                 println(error.toString())
-                listener?.onAddDeviceFail()
+                listener.onAddDeviceFail()
             })
     }
 
@@ -114,7 +121,7 @@ class IRRemotePi(private val context: Context, var listener: Listener) {
     }
 
     private fun refreshUrl() {
-        api.setBaseUrl(buildUrlFromSettings())
+        SingleApi.instance.setBaseUrl(buildUrlFromSettings())
     }
 
 //    fun setListener(listener: Listener) {
@@ -122,14 +129,28 @@ class IRRemotePi(private val context: Context, var listener: Listener) {
 //        this.listener = listener
 //    }
 
-    interface Listener {
-        fun onRefreshSuccess()
-        fun onRefreshFail()
-        fun onFactoryResetSuccess()
-        fun onFactoryResetFail()
-        fun onAddDeviceSuccess()
-        fun onAddDeviceFail()
-        fun onDeleteDeviceSuccess()
-        fun onDeleteDeviceFail()
+    open class Listener : Device.Listener() {
+
+        open fun onRefreshSuccess(){}
+        open fun onRefreshFail(){}
+        open fun onFactoryResetSuccess(){}
+        open fun onFactoryResetFail(){}
+        open fun onAddDeviceSuccess(){}
+        open fun onAddDeviceFail(){}
+        open fun onDeleteDeviceSuccess(){}
+        open fun onDeleteDeviceFail(){}
+
+        override fun onRefreshDeviceSuccess(device: Device) {}
+        override fun onRefreshDeviceFail(device: Device) {}
+        override fun onRecordSuccess() {}
+        override fun onRecordFail() {}
+        override fun onDeleteCommandSuccess() {}
+        override fun onDeleteCommandFail() {}
+        override fun onSetNameSuccess() {}
+        override fun onSetNameFail() {}
+        override fun onSetGpioSuccess() {}
+        override fun onSetGpioFail() {}
+        override fun onDeleteSuccess() {}
+        override fun onDeleteFail() {}
     }
 }
