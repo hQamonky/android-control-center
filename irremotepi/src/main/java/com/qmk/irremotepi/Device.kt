@@ -4,7 +4,7 @@ import android.util.Log
 import com.android.volley.Response
 import org.json.JSONObject
 
-class Device(val id: Int, var listener: Listener) {
+class Device(val id: Int, var listener: Listener? = null) {
     private var name: String? = null
     private var gpio: Int? = null
 //        get() = this.gpio
@@ -13,10 +13,10 @@ class Device(val id: Int, var listener: Listener) {
 
     init {
         // Initialize members
-        refresh()
+        refresh(this.listener)
     }
 
-    fun refresh() {
+    fun refresh(listener: Listener? = null) {
         IRRemotePi.SingleApi.instance.getDevice(id,
             Response.Listener { response ->
                 println(response.toString())
@@ -29,15 +29,15 @@ class Device(val id: Int, var listener: Listener) {
                     Log.d("Device", "Adding Command: ${command.getString("name")}")
                     commands.add(Command(id, command.getInt("id"), command.getString("name")))
                 }
-                listener.onRefreshDeviceSuccess(this)
+                listener?.onRefreshDeviceSuccess(this)
             }, Response.ErrorListener { error ->
                 // Handle error
                 println(error.toString())
-                listener.onRefreshDeviceFail(this)
+                listener?.onRefreshDeviceFail(this)
             })
     }
 
-    fun record(commandName: String) {
+    fun record(commandName: String, listener: Listener? = null) {
         val body = JSONObject("{ \"command_name\": $commandName }")
         IRRemotePi.SingleApi.instance.recordCommand(id, body,
             Response.Listener { response ->
@@ -60,16 +60,16 @@ class Device(val id: Int, var listener: Listener) {
         commands.removeAt(id)
     }
 
-    fun delete() {
+    fun delete(deviceListener: Listener? = null) {
         IRRemotePi.SingleApi.instance.deleteDevice(id,
             Response.Listener { response ->
                 println(response.toString())
-                listener?.onDeleteSuccess()
+                deviceListener?.onDeleteSuccess()
             },
             Response.ErrorListener { error ->
                 // Handle error
                 println(error.toString())
-                listener?.onDeleteFail()
+                deviceListener?.onDeleteFail()
             })
     }
 
@@ -77,7 +77,7 @@ class Device(val id: Int, var listener: Listener) {
         return name.toString()
     }
 
-    fun setName(name: String) {
+    fun setName(name: String, listener: Listener? = null) {
         val body = JSONObject("{ \"name\": $name, \"gpio\": $gpio }")
         IRRemotePi.SingleApi.instance.editDevice(id, body,
             Response.Listener { response ->
@@ -92,18 +92,18 @@ class Device(val id: Int, var listener: Listener) {
             })
     }
 
-    fun setGpio(gpio: Int) {
+    fun setGpio(gpio: Int, listener: Listener) {
         val body = JSONObject("{ \"name\": $name, \"gpio\": $gpio }")
         IRRemotePi.SingleApi.instance.editDevice(id, body,
             Response.Listener { response ->
                 println(response.toString())
                 this.gpio = gpio
-                listener?.onSetGpioSuccess()
+                listener.onSetGpioSuccess()
             },
             Response.ErrorListener { error ->
                 // Handle error
                 println(error.toString())
-                listener?.onSetGpioFail()
+                listener.onSetGpioFail()
             })
     }
 

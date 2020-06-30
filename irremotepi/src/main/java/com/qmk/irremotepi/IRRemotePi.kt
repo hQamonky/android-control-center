@@ -8,7 +8,7 @@ import com.android.volley.Response
 import org.json.JSONArray
 import org.json.JSONObject
 
-class IRRemotePi(private val context: Context, var listener: Listener) {
+class IRRemotePi(private val context: Context, var listener: Listener? = null) {
     object SingleApi {
         init {
             println("SingleIRRemotePi class invoked.")
@@ -22,7 +22,7 @@ class IRRemotePi(private val context: Context, var listener: Listener) {
     init {
         SingleApi.instance = API(context, buildUrlFromSettings())
         // Initiate members
-        refresh()
+        refresh(this.listener)
         // Set settings change listener
         val sharedPref = getDefaultSharedPreferences(context)
         sharedPref.registerOnSharedPreferenceChangeListener {
@@ -33,7 +33,7 @@ class IRRemotePi(private val context: Context, var listener: Listener) {
         }
     }
 
-    fun refresh() {
+    fun refresh(listener: Listener? = null) {
         // Update members from SingleApi.instance
         SingleApi.instance.getDevices(
             Response.Listener { response ->
@@ -45,16 +45,16 @@ class IRRemotePi(private val context: Context, var listener: Listener) {
                     Log.d("IRRemotePi", "Adding Device: ${device.getString("name")}")
                     devices.add(Device(device.getInt("id"), listener))
                 }
-                listener.onRefreshSuccess()
+                listener?.onRefreshSuccess()
             }, Response.ErrorListener { error ->
                 // Handle error
                 println(error.toString())
-                listener.onRefreshFail()
+                listener?.onRefreshFail()
             }
         )
     }
 
-    fun factoryReset(context: Context) {
+    fun factoryReset(context: Context, listener: Listener? = null) {
         val alertDialog: AlertDialog? = context.let {
             val builder = AlertDialog.Builder(it)
             builder.apply {
@@ -66,11 +66,11 @@ class IRRemotePi(private val context: Context, var listener: Listener) {
                         Response.Listener { response ->
                             println(response.toString())
                             devices.clear()
-                            listener.onFactoryResetSuccess()
+                            listener?.onFactoryResetSuccess()
                         }, Response.ErrorListener { error ->
                             // Handle error
                             println(error.toString())
-                            listener.onFactoryResetFail()
+                            listener?.onFactoryResetFail()
                         })
                 }
                 setNegativeButton(R.string.cancel) { dialog, _ ->
@@ -84,25 +84,28 @@ class IRRemotePi(private val context: Context, var listener: Listener) {
         alertDialog!!.show()
     }
 
-    fun addDevice(name: String, gpio: Int) {
+    fun addDevice(name: String, gpio: Int, listener: Listener? = null) {
         val body = JSONObject("{ \"name\": \"$name\", \"gpio\": $gpio }")
         SingleApi.instance.createDevice(body,
             Response.Listener { response ->
                 println(response.toString())
                 val json = com.qmk.httpclient.getDataObject(response.toString())
-                devices.add(Device(json.getInt("id"), listener))
-                listener.onAddDeviceSuccess()
+                devices.add(Device(json.getInt("id")))
+                listener?.onAddDeviceSuccess()
             }, Response.ErrorListener { error ->
                 // Handle error
                 println(error.toString())
-                listener.onAddDeviceFail()
+                listener?.onAddDeviceFail()
             })
     }
 
     fun deleteDevice(id: Int) {
-        devices[id].delete()
-        // TODO: Remove device form devices in success callback
-        devices.removeAt(id)
+        devices[id].delete(object : Device.Listener() {
+            override fun onDeleteSuccess() {
+                super.onDeleteSuccess()
+                devices.removeAt(id)
+            }
+        })
     }
 
     private fun buildUrlFromSettings() : String {
