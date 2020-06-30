@@ -108,6 +108,10 @@ class IRRemotePi(private val context: Context, var listener: Listener? = null) {
         })
     }
 
+    fun cancelRecording() {
+        SingleApi.instance.cancelSyncRequests()
+    }
+
     private fun buildUrlFromSettings() : String {
         val sharedPref = getDefaultSharedPreferences(context)
 

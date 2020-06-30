@@ -38,12 +38,12 @@ class Device(val id: Int, var listener: Listener? = null) {
     }
 
     fun record(commandName: String, listener: Listener? = null) {
-        val body = JSONObject("{ \"command_name\": $commandName }")
+        val body = JSONObject("{ \"command_name\": \"$commandName\" }")
         IRRemotePi.SingleApi.instance.recordCommand(id, body,
             Response.Listener { response ->
                 println(response.toString())
                 // Add new command to commands member
-                val command = JSONObject(response.toString())
+                val command = com.qmk.httpclient.getDataObject(response.toString())
                 commands.add(Command(id, command.getInt("id"), commandName))
                 listener?.onRecordSuccess()
             },

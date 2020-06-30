@@ -17,6 +17,12 @@
     <string name="device_gpio">Device GPIO pin</string>
     <string name="title_activity_settings">SettingsActivity</string>
 
+    <string name="add_command">Add Command</string>
+    <string name="new_command_dialog_title">New Command</string>
+    <string name="command_name">Command name</string>
+    <string name="recording_command_dialog_title">Recording command</string>
+    <string name="recording_command_dialog_message">Ready to record command…</string>
+
     <!-- Preference Titles -->
     <string name="messages_header">Messages</string>
     <string name="sync_header">Sync</string>

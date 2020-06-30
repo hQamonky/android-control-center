@@ -134,7 +134,6 @@ class MainActivity : AppCompatActivity() {
         if (array.isNotEmpty()) {
             val alertDialog: AlertDialog? = this.let {
                 val builder = AlertDialog.Builder(it)
-                // Get the layout
                 var selectedItem = 0
                 builder.apply {
                     setTitle(R.string.new_device_dialog_title)

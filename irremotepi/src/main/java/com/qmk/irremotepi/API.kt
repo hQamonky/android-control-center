@@ -34,7 +34,7 @@ class API(context: Context, baseURL: String) : API(context, baseURL) {
 
     // Commands
     fun recordCommand(deviceId: Int, arguments: JSONObject, responseListener: Response.Listener<JSONObject>, responseErrorListener: Response.ErrorListener) {
-        syncJsonPostRequest("/devices/$deviceId/record", arguments, responseListener, responseErrorListener)
+        syncJsonPostRequest("/device/$deviceId/record", arguments, responseListener, responseErrorListener)
     }
 
     fun editCommand(deviceId: Int, commandId: Int, arguments: JSONObject, responseListener: Response.Listener<JSONObject>, responseErrorListener: Response.ErrorListener) {
